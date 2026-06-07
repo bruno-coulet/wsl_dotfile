@@ -1,0 +1,8 @@
+[tool.ruff]
+# Appliquer les règles : E (Error), F (Pyflakes), I (isort/Imports)
+select = ["E", "F", "I"]
+line-length = 88
+
+[tool.ruff.lint]
+# Optionnel : si tu veux que Ruff corrige automatiquement certains problèmes
+fixable = ["ALL"]

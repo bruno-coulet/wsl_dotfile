@@ -1,51 +1,71 @@
 # ==============================================================================
-# 1. INITIALISATION & SÉCURITÉ
+# ~/.bashrc — Configuration Bash WSL2 Ubuntu
+# Repo    : ~/wsl_dotfile
+# Auteur  : bruno-coulet
 # ==============================================================================
+
+# ------------------------------------------------------------------------------
+# 1. SECURITE : ne rien executer dans un shell non-interactif
+# ------------------------------------------------------------------------------
 case $- in
-  *i*) ;;
-    *) return;;
+    *i*) ;;
+      *) return;;
 esac
 
-# ==============================================================================
-# 2. DESIGN & THÈME (STARSHIP NATIVE)
-# ==============================================================================
-# Initialisation du prompt Starship (installé dans /usr/local/bin par défaut)
-eval "$(starship init bash)"
+# ------------------------------------------------------------------------------
+# 2. PATH : uv, et VS Code (chemin Windows via /mnt/c)
+# ------------------------------------------------------------------------------
+# uv (installe via : curl -Lsf https://astral.sh/uv/install.sh | sh)
+export PATH="$HOME/.local/bin:$PATH"
 
-# ==============================================================================
-# 3. GESTION AUTOMATIQUE DU VENV (PYTHON / UV)
-# ==============================================================================
-# Raccourci pour forcer l'activation manuelle sous Linux
+# Charge les variables d'environnement de uv si le fichier existe
+[ -f "$HOME/.local/bin/env" ] && . "$HOME/.local/bin/env"
+
+# VS Code depuis Windows
+VSCODE_WIN="/mnt/c/Users/coule/AppData/Local/Programs/Microsoft VS Code/bin"
+[ -d "$VSCODE_WIN" ] && export PATH="$PATH:$VSCODE_WIN"
+
+# ------------------------------------------------------------------------------
+# 3. PROMPT : Starship
+# ------------------------------------------------------------------------------
+if command -v starship &>/dev/null; then
+    eval "$(starship init bash)"
+fi
+
+# ------------------------------------------------------------------------------
+# 4. GESTION AUTOMATIQUE DU VENV (uv)
+# ------------------------------------------------------------------------------
 alias venv='source .venv/bin/activate'
 
-# Fonction d'activation automatique au changement de dossier
-function check_venv {
+check_venv() {
     if [ -d ".venv" ] && [ -z "$VIRTUAL_ENV" ]; then
         source .venv/bin/activate
     fi
 }
 
-# Surcharge de la commande 'cd' pour déclencher la vérification du venv sous WSL
 cd() {
     builtin cd "$@" && check_venv
 }
 
-# ==============================================================================
-# 4. RACCOURCIS IA & VIBE CODING (VERSION WSL)
-# ==============================================================================
-alias claude='claude' # Lancé nativement si installé via npm sur Ubuntu
+# ------------------------------------------------------------------------------
+# 5. ALIASES IA & VIBECODING
+# ------------------------------------------------------------------------------
+if command -v claude &>/dev/null; then
+    alias claude='claude'
+else
+    alias claude='echo "Claude Code non installe. Lancer : npm install -g @anthropic-ai/claude-code"'
+fi
+
 alias ask-ai='gh copilot suggest'
 alias explain-ai='gh copilot explain'
 
-# ==============================================================================
-# 5. ALIAS GÉNÉRAUX & RACCOURCIS GIT
-# ==============================================================================
-export STARSHIP_DISTRO="🐧 WSL" # Badge pour le prompt
+# ------------------------------------------------------------------------------
+# 6. ALIASES GENERAUX & GIT
+# ------------------------------------------------------------------------------
 alias reload='source ~/.bashrc'
 alias explorer='explorer.exe .'
 alias projets='cd ~/Documents/projets'
 
-# Raccourcis Git Personnels
 alias gf='git fetch'
 alias gs='git status'
 alias ga='git add'
@@ -53,86 +73,92 @@ alias gc='git commit -m'
 alias gph='git push'
 alias gpl='git pull'
 
-# ==============================================================================
-# 6. FONCTION D'INITIALISATION DE PROJET (VERSION WSL CORRIGÉE)
-# ==============================================================================
+# ------------------------------------------------------------------------------
+# 7. FONCTION INIT-PROJECT
+# Cree un projet Python avec uv, venv, config VSCode, Ruff et instructions IA
+# Usage : init-project <nom-du-projet>
+# ------------------------------------------------------------------------------
 init-project() {
     local BASE_DIR="$HOME/Documents/projets"
-    local TEMPLATE_DIR="$HOME/templates"
+    local TEMPLATE_DIR="$HOME/wsl_dotfile/templates"
 
     if [ -z "$1" ]; then
-        echo "❌ Erreur : Il faut  spécifier un nom de projet."
+        echo "Erreur : specifier un nom de projet."
+        echo "Usage  : init-project <nom-du-projet>"
         return 1
     fi
 
     local TARGET_DIR="$BASE_DIR/$1"
+
     if [ -d "$TARGET_DIR" ]; then
-        echo "❌ Erreur : Le projet '$1' existe déjà"
+        echo "Erreur : le projet '$1' existe deja dans $BASE_DIR"
         return 1
     fi
 
-    # 1. On laisse uv créer le dossier ET l'architecture de base
-    echo "🚀 Initialisation du projet moderne via uv init..."
+    if ! command -v uv &>/dev/null; then
+        echo "Erreur : uv n'est pas installe ou absent du PATH."
+        echo "Installation : curl -Lsf https://astral.sh/uv/install.sh | sh"
+        return 1
+    fi
+
+    echo "Initialisation du projet '$1' avec uv..."
     uv init --app --python 3.12 "$TARGET_DIR"
-    
     cd "$TARGET_DIR" || return 1
 
-    # 2. Peaufine le .gitignore généré par uv, ajoute :
-    {
-        echo ""
-        echo "# Sécurité & Environnement"
-        echo ".env"
-        echo "*.pyc"
-        echo "# Data & Assistant IA"
-        echo "CLAUDE.md"
-        echo ".github/copilot-instructions.md"
-        echo "data/*"
-        echo "temp/*"
-        echo "# caches Python"
-        echo "__pycache__/"
-    } >> .gitignore
+    mkdir -p data temp .github .vscode
 
-    # 📁 Création des dossiers de travail (vides)
-    mkdir -p data temp
+    cat >> .gitignore << 'EOF'
 
-    # 3 Copie de la configuration VS Code et Ruff
-    mkdir -p .vscode
-    [ -f "$TEMPLATE_DIR/vscode-settings/settings.json" ] && cp "$TEMPLATE_DIR/vscode-settings/settings.json" ./.vscode/settings.json
-    [ -f "$TEMPLATE_DIR/pyproject.toml" ] && cp "$TEMPLATE_DIR/pyproject.toml" ./pyproject.toml
+# Securite
+.env
 
+# Caches Python
+*.pyc
+__pycache__/
 
-    # 3.5 Copie des fichiers d'instructions IA
-    mkdir -p .github
-    [ -f "$TEMPLATE_DIR/CLAUDE_WSL.md" ] && cp "$TEMPLATE_DIR/CLAUDE_WSL.md" ./CLAUDE.md
-    [ -f "$TEMPLATE_DIR/copilot-instructions.md" ] && cp "$TEMPLATE_DIR/copilot-instructions.md" ./.github/copilot-instructions.md
+# Donnees locales
+data/
+temp/
 
-    # 4. Premier commit automatique (uv init a déjà fait le git init en tâche de fond)
+# Fichiers IA (instructions locales, non versionnees en entreprise)
+CLAUDE.md
+.github/copilot-instructions.md
+EOF
+
+    local copied=0
+    if [ -f "$TEMPLATE_DIR/settings.json" ]; then
+        cp "$TEMPLATE_DIR/settings.json" .vscode/settings.json && copied=$((copied + 1))
+    fi
+    if [ -f "$TEMPLATE_DIR/pyproject.toml" ]; then
+        cp "$TEMPLATE_DIR/pyproject.toml" ./pyproject.toml && copied=$((copied + 1))
+    fi
+    if [ -f "$TEMPLATE_DIR/CLAUDE_WSL.md" ]; then
+        cp "$TEMPLATE_DIR/CLAUDE_WSL.md" ./CLAUDE.md && copied=$((copied + 1))
+    fi
+    if [ -f "$TEMPLATE_DIR/copilot-instructions.md" ]; then
+        cp "$TEMPLATE_DIR/copilot-instructions.md" .github/copilot-instructions.md && copied=$((copied + 1))
+    fi
+
+    echo "$copied fichier(s) de template copies."
+
     git add .
-    git commit -m "feat: initialisation du projet avec uv et instructions IA"
+    git commit -m "feat: initialisation du projet avec uv"
 
-    echo "✅ Projet prêt avec pyproject.toml."
+    echo "Projet '$1' pret dans $TARGET_DIR"
+    echo "Ouverture dans VS Code..."
+    code .
 }
 
-
-
-# ==============================================================================
-# 7. CONDA INITIALIZATION (WSL)
-# ==============================================================================
-__conda_setup="$('/home/coule/miniconda3/bin/conda' 'shell.bash' 'hook' 2> /dev/null)"
-if [ $? -eq 0 ]; then
-    eval "$__conda_setup"
-else
-    if [ -f "/home/coule/miniconda3/etc/profile.d/conda.sh" ]; then
-        . "/home/coule/miniconda3/etc/profile.d/conda.sh"
-    else
-        export PATH="/home/coule/miniconda3/bin:$PATH"
-    fi
-fi
-unset __conda_setup
-
-
-# =====================================
-# 5. Ouverture  dans vscode
-# ================================
-    echo "Ouverture du projet dans VS Code..."
-    code .
+# ------------------------------------------------------------------------------
+# 8. CONDA (desactive si uv est utilise en priorite)
+# Pour reactiver conda, decommenter le bloc ci-dessous
+# ------------------------------------------------------------------------------
+# __conda_setup="$('/home/coule/miniconda3/bin/conda' 'shell.bash' 'hook' 2>/dev/null)"
+# if [ $? -eq 0 ]; then
+#     eval "$__conda_setup"
+# else
+#     [ -f "/home/coule/miniconda3/etc/profile.d/conda.sh" ] \
+#         && . "/home/coule/miniconda3/etc/profile.d/conda.sh" \
+#         || export PATH="/home/coule/miniconda3/bin:$PATH"
+# fi
+# unset __conda_setup

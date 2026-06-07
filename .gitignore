@@ -1,0 +1,9 @@
+*.backup
+.DS_Store
+.env
+.env.*
+
+.ssh/
+.aws/
+.azure/
+OLD_*
