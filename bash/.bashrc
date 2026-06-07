@@ -162,3 +162,4 @@ EOF
 #         || export PATH="/home/coule/miniconda3/bin:$PATH"
 # fi
 # unset __conda_setup
+export PATH="$HOME/.npm-global/bin:$PATH"
