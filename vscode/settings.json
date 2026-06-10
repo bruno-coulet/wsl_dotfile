@@ -6,7 +6,7 @@
     "terminal.integrated.initialHint": false,
     "workbench.colorCustomizations": {},
 
-    "python.defaultInterpreterPath": ".venv/bin/python",
+    // "python.defaultInterpreterPath": ".venv/bin/python",
     "python.analysis.extraPaths": ["./src"],
     "python.analysis.typeCheckingMode": "basic",
     "python.analysis.autoImportCompletions": true,

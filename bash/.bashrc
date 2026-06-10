@@ -35,17 +35,31 @@ fi
 # ------------------------------------------------------------------------------
 # 4. GESTION AUTOMATIQUE DU VENV (uv)
 # ------------------------------------------------------------------------------
+
 alias venv='source .venv/bin/activate'
 
 check_venv() {
-    if [ -d ".venv" ] && [ -z "$VIRTUAL_ENV" ]; then
-        source .venv/bin/activate
+    local current_dir="$PWD"
+    local project_venv="$current_dir/.venv"
+
+    # Si un venv est actif mais n'est pas celui du dossier courant
+    if [ -n "$VIRTUAL_ENV" ] && [ "$VIRTUAL_ENV" != "$project_venv" ]; then
+        deactivate 2>/dev/null
+    fi
+
+    # Active automatiquement le venv du projet courant
+    if [ -d "$project_venv" ] && [ -z "$VIRTUAL_ENV" ]; then
+        source "$project_venv/bin/activate"
     fi
 }
 
 cd() {
-    builtin cd "$@" && check_venv
+    builtin cd "$@" || return
+    check_venv
 }
+
+# Vérification au démarrage du shell
+check_venv
 
 # ------------------------------------------------------------------------------
 # 5. ALIASES IA & VIBECODING
@@ -105,6 +119,9 @@ init-project() {
     uv init --app --python 3.12 "$TARGET_DIR"
     cd "$TARGET_DIR" || return 1
 
+    # Creation du venv et synchronisation du projet
+    uv sync
+
     mkdir -p data temp .github .vscode
 
     cat >> .gitignore << 'EOF'
@@ -146,6 +163,7 @@ EOF
 
     echo "Projet '$1' pret dans $TARGET_DIR"
     echo "Ouverture dans VS Code..."
+    check_venv
     code .
 }
 
