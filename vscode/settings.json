@@ -1,41 +1,124 @@
+// {
+//     "security.allowedUNCHosts": ["wsl.localhost"],
+//     "files.autoSave": "afterDelay",
+//     "accessibility.signals.lineHasInlineSuggestion": { "sound": "off" },
+//     "editor.accessibilitySupport": "off",
+//     "terminal.integrated.initialHint": false,
+//     "workbench.colorCustomizations": {},
+
+//     // "python.defaultInterpreterPath": ".venv/bin/python",
+//     "python.analysis.extraPaths": ["./src"],
+//     "python.analysis.typeCheckingMode": "basic",
+//     "python.analysis.autoImportCompletions": true,
+//     "python.analysis.diagnosticMode": "workspace",
+
+//     "editor.inlineSuggest.enabled": true,
+//     "editor.suggestSelection": "first",
+//     "editor.formatOnSave": true,
+//     "editor.defaultFormatter": "charliermarsh.ruff",
+//     "editor.codeActionsOnSave": {
+//         "source.fixAll": "explicit",
+//         "source.organizeImports": "explicit"
+//     },
+
+//     "[python]": {
+//         "editor.defaultFormatter": "charliermarsh.ruff",
+//         "editor.codeActionsOnSave": {
+//             "source.fixAll": "explicit",
+//             "source.organizeImports": "explicit"
+//         }
+//     },
+
+//     "ruff.enable": true,
+
+//     "jupyter.askForKernelRestart": false,
+//     "jupyter.interactiveWindow.textEditor.executeSelection": true,
+
+//     "csv-preview.separator": ",",
+
+//     "files.trimTrailingWhitespace": true,
+//     "files.insertFinalNewline": true
+// }
+
 {
-    "security.allowedUNCHosts": ["wsl.localhost"],
-    "files.autoSave": "afterDelay",
-    "accessibility.signals.lineHasInlineSuggestion": { "sound": "off" },
-    "editor.accessibilitySupport": "off",
-    "terminal.integrated.initialHint": false,
-    "workbench.colorCustomizations": {},
+  // =========================
+  // ÉDITEUR (base)
+  // =========================
+  "editor.fontSize": 14,
+  "editor.tabSize": 4,
+  "editor.insertSpaces": true,
+  "editor.formatOnSave": true,
+  "editor.bracketPairColorization.enabled": true,
+  "editor.inlineSuggest.enabled": true,
+  "editor.suggestSelection": "first",
 
-    // "python.defaultInterpreterPath": ".venv/bin/python",
-    "python.analysis.extraPaths": ["./src"],
-    "python.analysis.typeCheckingMode": "basic",
-    "python.analysis.autoImportCompletions": true,
-    "python.analysis.diagnosticMode": "workspace",
+  // =========================
+  // FICHIERS
+  // =========================
+  "files.autoSave": "afterDelay",
+  "files.autoSaveDelay": 1000,
+  "files.trimTrailingWhitespace": true,
+  "files.insertFinalNewline": true,
 
-    "editor.inlineSuggest.enabled": true,
-    "editor.suggestSelection": "first",
-    "editor.formatOnSave": true,
+  // =========================
+  // TERMINAL
+  // =========================
+  "terminal.integrated.defaultProfile.linux": "bash",
+
+  // ⚠️ inutile sur WSL (on enlève PowerShell)
+  // "terminal.integrated.defaultProfile.windows": "PowerShell",
+
+  // =========================
+  // GIT
+  // =========================
+  "git.autofetch": true,
+
+  // =========================
+  // EMmet (HTML/CSS)
+  // =========================
+  "emmet.triggerExpansionOnTab": true,
+
+  // =========================
+  // PYTHON (Pylance / Ruff)
+  // =========================
+  "python.analysis.extraPaths": ["./src"],
+  "python.analysis.typeCheckingMode": "basic",
+  "python.analysis.autoImportCompletions": true,
+  "python.analysis.diagnosticMode": "workspace",
+
+  "ruff.enable": true,
+
+  // IMPORTANT :
+  // option obsolète / inutile à supprimer :
+  // "python.analysis.importPaths": ["./src"],
+
+  // =========================
+  // FORMATAGE PYTHON
+  // =========================
+  "[python]": {
     "editor.defaultFormatter": "charliermarsh.ruff",
     "editor.codeActionsOnSave": {
-        "source.fixAll": "explicit",
-        "source.organizeImports": "explicit"
-    },
+      "source.fixAll": "explicit",
+      "source.organizeImports": "explicit"
+    }
+  },
 
-    "[python]": {
-        "editor.defaultFormatter": "charliermarsh.ruff",
-        "editor.codeActionsOnSave": {
-            "source.fixAll": "explicit",
-            "source.organizeImports": "explicit"
-        }
-    },
+  // =========================
+  // JUPYTER
+  // =========================
+  "jupyter.askForKernelRestart": false,
+  "jupyter.interactiveWindow.textEditor.executeSelection": true,
 
-    "ruff.enable": true,
+  // =========================
+  // UI / ACCESSIBILITÉ
+  // =========================
+  "accessibility.signals.lineHasInlineSuggestion.sound": "off",
+  "editor.accessibilitySupport": "off",
 
-    "jupyter.askForKernelRestart": false,
-    "jupyter.interactiveWindow.textEditor.executeSelection": true,
+  "window.zoomLevel": 0,
 
-    "csv-preview.separator": ",",
-
-    "files.trimTrailingWhitespace": true,
-    "files.insertFinalNewline": true
+  // =========================
+  // CSV (optionnel)
+  // =========================
+  "csv-preview.separator": ","
 }
